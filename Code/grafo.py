@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from collections import deque, defaultdict
 
 class Vertice:
     def __init__(self, nome, x=None, y=None):
@@ -100,10 +101,77 @@ class Grafo:
                   capacity=aresta.capacidade
               )
       return G
+    
+    @staticmethod
+    def fluxo_maximo(flowG, _s, _t):
+    # Inicializa capacidades residuais e o fluxo
+      residual = defaultdict(dict)
+      flow = defaultdict(dict)
+
+      # Prepara o grafo residual com todas as arestas (u, v) e (v, u)
+      for u in flowG.nodes:
+          for v in flowG.nodes:
+              residual[u][v] = 0
+              flow[u][v] = 0
+
+      for u, v, data in flowG.edges(data=True):
+          capacidade = data.get('capacity', float('inf'))
+          residual[u][v] = capacidade  # capacidade direta
+          residual[v][u] = 0           # capacidade reversa (0 no início)
+          flow[u][v] = 0               # fluxo inicial
+
+      def bfs(source, sink, parent):
+          visited = set()
+          queue = deque([source])
+          visited.add(source)
+
+          while queue:
+              u = queue.popleft()
+              for v in residual[u]:
+                  if v not in visited and residual[u][v] > 0:
+                      visited.add(v)
+                      parent[v] = u
+                      if v == sink:
+                          return True
+                      queue.append(v)
+          return False
+
+      max_flow = 0
+      parent = {}
+
+      while bfs(_s, _t, parent):
+          # Encontra capacidade mínima do caminho encontrado
+          path_flow = float('inf')
+          s = _t
+          while s != _s:
+              path_flow = min(path_flow, residual[parent[s]][s])
+              s = parent[s]
+
+          # Atualiza capacidades residuais e o fluxo
+          v = _t
+          while v != _s:
+              u = parent[v]
+              residual[u][v] -= path_flow
+              residual[v][u] += path_flow
+              flow[u][v] += path_flow
+              flow[v][u] -= path_flow  # fluxo reverso
+              v = parent[v]
+
+          max_flow += path_flow
+          parent = {}
+
+      # Formata o fluxo no estilo do NetworkX
+      flow_dict = {}
+      for u in flowG.nodes:
+          flow_dict[u] = {}
+          for v in flowG[u]:
+              flow_dict[u][v] = flow[u][v]
+
+      return max_flow, flow_dict
 
     def calcular_fluxo_maximo(self, origem, destino):
         G = self.to_networkx()
-        fluxo_valor, fluxo_dict = nx.maximum_flow(G, origem, destino)
+        fluxo_valor, fluxo_dict = self.fluxo_maximo(G, origem, destino)
         return fluxo_valor, fluxo_dict
 
     def exibir_fluxo_maximo(self, origem, destino):

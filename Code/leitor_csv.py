@@ -15,7 +15,7 @@ def carregar_grafo_de_csv(caminho_arquivo):
             target_x = float(linha['target_x'])
             target_y = float(linha['target_y'])
 
-            capacidade = float(linha['capacity_m3_day'])/1000  # novo nome da coluna
+            capacidade = float(linha['capacity_m3_day'])/100  # novo nome da coluna
             distancia = float(linha['distance_km'])       # novo nome da coluna
             direcao = linha['direction'].strip().lower()
 
