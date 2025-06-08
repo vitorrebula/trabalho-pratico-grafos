@@ -108,7 +108,7 @@ class Grafo:
 
     def exibir_fluxo_maximo(self, origem, destino):
         fluxo_valor, fluxo_dict = self.calcular_fluxo_maximo(origem, destino)
-        print(f"Fluxo máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
+        print(f"Fluxo máximo de {origem} para {destino}: {fluxo_valor} dam³/dia")
 
         G = self.to_networkx()
 
@@ -140,7 +140,7 @@ class Grafo:
         nx.draw_networkx_edges(G, pos, arrowstyle='-|>', arrowsize=15, edge_color=edge_colors)
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=6)
 
-        plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
+        plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} dam³/dia")
         plt.axis('off')
         plt.tight_layout()
         plt.show()
