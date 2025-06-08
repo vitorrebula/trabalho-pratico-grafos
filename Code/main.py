@@ -1,15 +1,13 @@
 from leitor_csv import carregar_grafo_de_csv
 
 def main():
-    caminho_arquivo = 'rede.csv'  # Altere se o caminho do seu arquivo for diferente
-    grafo = carregar_grafo_de_csv(caminho_arquivo)
+    caminho = 'rede.csv'
+    grafo = carregar_grafo_de_csv(caminho)
 
-    print("\n--- Grafo Carregado ---")
-    print(grafo)
+    origem = "Source_Spring_Gamma"
+    destino = "Demand_Tourism"
 
-    print("\n--- Exibindo Grafo Visualmente ---")
-    grafo.exibir_grafo()
-
+    grafo.exibir_fluxo_maximo(origem, destino)  # Desenha grafo com fluxo máximo
 
 if __name__ == "__main__":
     main()

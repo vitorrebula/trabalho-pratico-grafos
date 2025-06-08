@@ -87,6 +87,64 @@ class Grafo:
         plt.axis('off')
         plt.tight_layout()
         plt.show()
+        
+    def to_networkx(self):
+      G = nx.DiGraph()
+      for vertice in self.vertices.values():
+          G.add_node(vertice.nome)
+      for vertice in self.vertices.values():
+          for aresta in vertice.arestas:
+              G.add_edge(
+                  aresta.origem.nome,
+                  aresta.destino.nome,
+                  capacity=aresta.capacidade
+              )
+      return G
+
+    def calcular_fluxo_maximo(self, origem, destino):
+        G = self.to_networkx()
+        fluxo_valor, fluxo_dict = nx.maximum_flow(G, origem, destino)
+        return fluxo_valor, fluxo_dict
+
+    def exibir_fluxo_maximo(self, origem, destino):
+        fluxo_valor, fluxo_dict = self.calcular_fluxo_maximo(origem, destino)
+        print(f"Fluxo máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
+
+        G = self.to_networkx()
+
+        # Posicionamento dos nós baseado nas coordenadas
+        pos = {
+            nome: (v.x, v.y)
+            for nome, v in self.vertices.items()
+            if v.x is not None and v.y is not None
+        }
+
+        plt.figure(figsize=(12, 8))
+
+        # Desenha os nós
+        nx.draw_networkx_nodes(G, pos, node_size=500, node_color='skyblue')
+
+        # Desenha os rótulos dos nós
+        nx.draw_networkx_labels(G, pos, font_size=10)
+
+        # Prepara labels das arestas com o fluxo atual
+        edge_labels = {}
+        for u, v in G.edges():
+            fluxo_atual = fluxo_dict.get(u, {}).get(v, 0)
+            if fluxo_atual > 0:
+                edge_labels[(u, v)] = f"{fluxo_atual}"
+
+        # Desenha as arestas
+        nx.draw_networkx_edges(G, pos, arrowstyle='-|>', arrowsize=15)
+
+        # Desenha os labels das arestas com fluxo
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+
+        plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+
 
     def __repr__(self):
         return '\n'.join(f"{v.nome}: {v.arestas}" for v in self.vertices.values())
