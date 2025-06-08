@@ -81,7 +81,7 @@ class Grafo:
         edge_labels = nx.get_edge_attributes(G, 'label')
 
         plt.figure(figsize=(12, 8))
-        nx.draw(G, pos, with_labels=True, node_size=500, node_color='skyblue', font_size=6, arrows=True)
+        nx.draw(G, pos, with_labels=True, node_size=500, node_color='skyblue', font_size=10, arrows=True)
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=6)
         plt.title("Rede de Distribuição de Água")
         plt.axis('off')
@@ -112,7 +112,6 @@ class Grafo:
 
         G = self.to_networkx()
 
-        # Posicionamento dos nós baseado nas coordenadas
         pos = {
             nome: (v.x, v.y)
             for nome, v in self.vertices.items()
@@ -121,30 +120,30 @@ class Grafo:
 
         plt.figure(figsize=(12, 8))
 
-        # Desenha os nós
         nx.draw_networkx_nodes(G, pos, node_size=500, node_color='skyblue')
-
-        # Desenha os rótulos dos nós
         nx.draw_networkx_labels(G, pos, font_size=10)
 
-        # Prepara labels das arestas com o fluxo atual
+        # Preparar cores e labels das arestas
+        edge_colors = []
         edge_labels = {}
-        for u, v in G.edges():
+
+        for u, v, data in G.edges(data=True):
             fluxo_atual = fluxo_dict.get(u, {}).get(v, 0)
+            capacidade = data['capacity']
+
             if fluxo_atual > 0:
-                edge_labels[(u, v)] = f"{fluxo_atual}"
+                edge_colors.append('red')
+                edge_labels[(u, v)] = f"{fluxo_atual}/{int(capacidade)}"
+            else:
+                edge_colors.append('gray')
 
-        # Desenha as arestas
-        nx.draw_networkx_edges(G, pos, arrowstyle='-|>', arrowsize=15)
-
-        # Desenha os labels das arestas com fluxo
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+        nx.draw_networkx_edges(G, pos, arrowstyle='-|>', arrowsize=15, edge_color=edge_colors)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=6)
 
         plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
         plt.axis('off')
         plt.tight_layout()
         plt.show()
-
 
     def __repr__(self):
         return '\n'.join(f"{v.nome}: {v.arestas}" for v in self.vertices.values())

@@ -9,7 +9,7 @@ Reservoir_Main,1200,850,Reservoir_South,1500,750,11000,45,bidirectional
 Reservoir_North,1500,950,City_Greenvalley,2000,920,7000,12,unidirectional
 Reservoir_North,1500,950,City_Hillside,1800,850,5000,18,unidirectional
 Reservoir_South,1500,750,City_Hillside,1800,850,6000,15,bidirectional
-Reservoir_South,1500,750,City_Laketown,2200,700,8000,22,unidirectional
+Reservoir_South,1500,750,City_Laketown,2200,700,4000,22,unidirectional
 City_Greenvalley,2000,920,District_Downtown,2300,880,6500,8,unidirectional
 City_Hillside,1800,850,District_Uptown,2000,820,5500,10,bidirectional
 City_Hillside,1800,850,District_Suburb,1600,800,4500,14,unidirectional
