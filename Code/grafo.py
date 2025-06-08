@@ -108,10 +108,9 @@ class Grafo:
 
     def exibir_fluxo_maximo(self, origem, destino):
         fluxo_valor, fluxo_dict = self.calcular_fluxo_maximo(origem, destino)
-        print(f"Fluxo máximo de {origem} para {destino}: {fluxo_valor} dam³/dia")
+        print(f"Fluxo máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
 
         G = self.to_networkx()
-
         pos = {
             nome: (v.x, v.y)
             for nome, v in self.vertices.items()
@@ -123,24 +122,31 @@ class Grafo:
         nx.draw_networkx_nodes(G, pos, node_size=500, node_color='skyblue')
         nx.draw_networkx_labels(G, pos, font_size=10)
 
-        # Preparar cores e labels das arestas
         edge_colors = []
-        edge_labels = {}
+        edge_labels_fluxo = {}       # fluxo/capacidade (vermelho)
+        edge_labels_capacidade = {}  # 0/capacidade (cinza)
 
         for u, v, data in G.edges(data=True):
-            fluxo_atual = fluxo_dict.get(u, {}).get(v, 0)
-            capacidade = data['capacity']
+            capacidade = int(data['capacity'])
+            fluxo = int(fluxo_dict.get(u, {}).get(v, 0))
 
-            if fluxo_atual > 0:
+            if fluxo > 0:
                 edge_colors.append('red')
-                edge_labels[(u, v)] = f"{fluxo_atual}/{int(capacidade)}"
+                edge_labels_fluxo[(u, v)] = f"{fluxo}/{capacidade} m³"
             else:
                 edge_colors.append('gray')
+                edge_labels_capacidade[(u, v)] = f"0/{capacidade} m³"
 
+        # Desenha as arestas
         nx.draw_networkx_edges(G, pos, arrowstyle='-|>', arrowsize=15, edge_color=edge_colors)
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=6)
 
-        plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} dam³/dia")
+        # Primeiro desenha os rótulos cinza
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels_capacidade, font_color='gray', font_size=8)
+
+        # Depois desenha os rótulos vermelhos (sobrepõe visualmente)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels_fluxo, font_color='red', font_size=10)
+
+        plt.title(f"Fluxo Máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
         plt.axis('off')
         plt.tight_layout()
         plt.show()
