@@ -58,18 +58,37 @@ class Grafo:
             destino.adicionar_aresta(aresta_reversa)
 
     def exibir_grafo(self, escala=5):
+        import matplotlib.pyplot as plt
+        import networkx as nx
+
         G = nx.DiGraph()
 
         for vertice in self.vertices.values():
             G.add_node(vertice.nome)
 
+        capacidades = {}
         for vertice in self.vertices.values():
             for aresta in vertice.arestas:
-                G.add_edge(
-                    aresta.origem.nome,
-                    aresta.destino.nome,
-                    label=f"{aresta.capacidade}"
-                )
+                u = aresta.origem.nome
+                v = aresta.destino.nome
+                capacidades[(u, v)] = aresta.capacidade
+                G.add_edge(u, v)
+
+        edge_labels = {}
+        adicionados = set()
+
+        for (u, v), cap_uv in capacidades.items():
+            if (v, u) in capacidades and (v, u) not in adicionados:
+                cap_vu = capacidades[(v, u)]
+                label = f"→ {cap_uv} | {cap_vu} ←"
+                edge_labels[(u, v)] = label
+                edge_labels[(v, u)] = ""  # Oculta duplicado
+                adicionados.add((u, v))
+                adicionados.add((v, u))
+            elif (u, v) not in adicionados:
+                label = f"{cap_uv}"  # Sem setas se for só em um sentido
+                edge_labels[(u, v)] = label
+                adicionados.add((u, v))
 
         pos = {
             nome: (v.x * escala, v.y * escala)
@@ -77,11 +96,10 @@ class Grafo:
             if v.x is not None and v.y is not None
         }
 
-        edge_labels = nx.get_edge_attributes(G, 'label')
-
         plt.figure(figsize=(12, 8))
         nx.draw(G, pos, with_labels=True, node_size=500, node_color='skyblue', font_size=10, arrows=True)
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=6)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=7)
+
         plt.title("Rede de Distribuição de Água")
         plt.axis('off')
         plt.tight_layout()
@@ -217,6 +235,77 @@ class Grafo:
         plt.axis('off')
         plt.tight_layout()
         plt.show()
+        
+    def exibir_fluxo_e_gargalo(self, origem, destino):
+        fluxo_valor, fluxo_dict = self.calcular_fluxo_maximo(origem, destino)
+        print(f"\n💧 Fluxo máximo de {origem} para {destino}: {fluxo_valor} m³/dia")
 
+        G = self.to_networkx()
+        pos = {
+            nome: (v.x, v.y)
+            for nome, v in self.vertices.items()
+            if v.x is not None and v.y is not None
+        }
+
+        # 1. Identifica gargalos
+        gargalos = []
+        for u, v in G.edges():
+            capacidade = int(G[u][v]['capacity'])
+            fluxo = int(fluxo_dict.get(u, {}).get(v, 0))
+            if fluxo == capacidade and capacidade > 0:
+                gargalos.append((u, v, capacidade))
+
+        gargalo_critico = min(gargalos, key=lambda x: x[2]) if gargalos else None
+
+        # 2. Coleta rótulos e classifica arestas
+        edge_labels_vermelho = {}
+        edge_labels_preto = {}
+        fluxo_positivo = []
+        sem_fluxo = []
+
+        for u, v in G.edges():
+            capacidade = int(G[u][v]['capacity'])
+            fluxo = int(fluxo_dict.get(u, {}).get(v, 0))
+            label = f"{fluxo}/{capacidade}"
+
+            if fluxo > 0:
+                fluxo_positivo.append((u, v))
+                edge_labels_vermelho[(u, v)] = label
+            else:
+                sem_fluxo.append((u, v))
+                edge_labels_preto[(u, v)] = label
+
+        # 3. Visualização
+        plt.figure(figsize=(12, 8))
+        nx.draw_networkx_nodes(G, pos, node_size=500, node_color='skyblue')
+        nx.draw_networkx_labels(G, pos, font_size=10)
+
+        # Arestas sem fluxo (cinza)
+        nx.draw_networkx_edges(G, pos, edgelist=sem_fluxo, edge_color='gray', arrows=True, arrowstyle='-|>', arrowsize=15)
+
+        # Arestas com fluxo (vermelho)
+        nx.draw_networkx_edges(G, pos, edgelist=fluxo_positivo, edge_color='red', arrows=True, arrowstyle='-|>', arrowsize=15)
+
+        # Gargalo (azul por cima)
+        if gargalo_critico:
+            u, v, cap = gargalo_critico
+            nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], edge_color='blue', width=3.5, arrows=True, arrowstyle='-|>', arrowsize=20)
+            plt.title("Recomendação: aumentar a capacidade desse cano (linha azul no grafo).")
+        else:
+            plt.title("Nenhum gargalo detectado — nenhuma aresta totalmente saturada.")
+
+        # Labels: primeiro preto (sem fluxo), depois vermelho, depois o gargalo por cima
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels_preto, font_size=9, font_color='black')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels_vermelho, font_size=9, font_color='red')
+
+        if gargalo_critico:
+            u, v, _ = gargalo_critico
+            label = edge_labels_vermelho.get((u, v), "")
+            nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v): label}, font_size=10, font_color='red', font_weight='bold')
+
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+    
     def __repr__(self):
         return '\n'.join(f"{v.nome}: {v.arestas}" for v in self.vertices.values())

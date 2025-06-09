@@ -1,7 +1,7 @@
 source,source_x,source_y,target,target_x,target_y,capacity_m3_day,distance_km,direction
 Source_Rio_Grande,100,1000,Treatment_Alpha,500,900,12000,25,unidirectional
 Source_Aquifer_Beta,300,1050,Treatment_Alpha,500,900,8000,15,unidirectional
-Source_Spring_Gamma,800,1100,Treatment_Beta,1000,950,6000,20,unidirectional
+Source_Spring_Gamma,800,1100,Treatment_Beta,1000,950,10000,20,unidirectional
 Source_Spring_Gamma,800,1100,Demand_Agriculture,1500,1150,16000,20,unidirectional
 Source_Spring_Gamma,800,1100,Reservoir_North,1500,950,3000,20,unidirectional
 Treatment_Alpha,500,900,Reservoir_Main,1200,850,15000,30,unidirectional
