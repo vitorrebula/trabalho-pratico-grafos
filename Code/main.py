@@ -8,10 +8,10 @@ todos_vertices = list(grafo.vertices.keys())
 
 # Interface Visual
 root = tk.Tk()
-root.title("Fluxo de ")
+root.title("Fluxo de Abastecimento")
 root.geometry("500x400")
 
-label = tk.Label(root, text="Escolha uma opção:", font=("Arial", 14))
+label = tk.Label(root, text="Fluxo de Abastecimento - Escolha uma opção:", font=("Arial", 14))
 label.pack(pady=10)
 
 # Seletor de origem
