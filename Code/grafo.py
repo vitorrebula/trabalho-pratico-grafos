@@ -307,5 +307,61 @@ class Grafo:
         plt.tight_layout()
         plt.show()
     
+    @staticmethod
+    def desenhar_rede_residual(self, grafo_original, fluxo_dict):
+        import networkx as nx
+        import matplotlib.pyplot as plt
+
+        G = nx.DiGraph()
+        arestas_originais = set()
+
+        # Marca todas as arestas do grafo original
+        for vertice in grafo_original.vertices.values():
+            for aresta in vertice.arestas:
+                arestas_originais.add((aresta.origem.nome, aresta.destino.nome))
+
+        for vertice in grafo_original.vertices.values():
+            for aresta in vertice.arestas:
+                u = aresta.origem.nome
+                v = aresta.destino.nome
+                capacidade = aresta.capacidade
+                fluxo = fluxo_dict.get(u, {}).get(v, 0)
+
+                capacidade_residual = capacidade - fluxo
+
+                # Aresta direta residual
+                if capacidade_residual > 0:
+                    G.add_edge(u, v, capacidade=capacidade, residual=capacidade_residual, cor='green')
+
+                # Aresta reversa (somente se não existir no original)
+                if fluxo > 0:
+                    if (v, u) not in arestas_originais:
+                        G.add_edge(v, u, capacidade=fluxo, residual=fluxo, cor='orange')
+
+        # Posicionamento dos nós
+        pos = {
+            nome: (v.x, v.y)
+            for nome, v in self.vertices.items()
+            if v.x is not None and v.y is not None
+        }
+
+        edge_colors = [data['cor'] for _, _, data in G.edges(data=True)]
+        edge_labels = {
+            (u, v): f"{data['residual']}/{data['capacidade']}"
+            for u, v, data in G.edges(data=True)
+        }
+
+        plt.figure(figsize=(12, 8))
+        nx.draw_networkx_nodes(G, pos, node_size=500, node_color='lightyellow')
+        nx.draw_networkx_labels(G, pos, font_size=10)
+        nx.draw_networkx_edges(G, pos, edge_color=edge_colors, arrowstyle='-|>', arrowsize=15, width=2)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=9)
+
+        plt.title("Rede Residual (Capacidade restante / Capacidade total)")
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+
+    
     def __repr__(self):
         return '\n'.join(f"{v.nome}: {v.arestas}" for v in self.vertices.values())

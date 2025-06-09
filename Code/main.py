@@ -41,12 +41,6 @@ def calcular_fluxo():
     grafo.exibir_fluxo_maximo(origem, destino)
     messagebox.showinfo("Fluxo Máximo", f"Fluxo máximo de '{origem}' para '{destino}': {fluxoValor} m³/dia")
 
-def exibir_residual():
-    origem = var_origem.get()
-    destino = var_destino.get()
-    _, fluxoDict = grafo.calcular_fluxo_maximo(origem, destino)
-    grafo.desenhar_rede_residual(grafo, fluxoDict)
-
 def sugerir_cano():
     origem = var_origem.get()
     destino = var_destino.get()
@@ -58,11 +52,10 @@ def sair():
 # Botões
 botao_a = tk.Button(root, text="A - Exibir Grafo", width=40, command=exibir_grafo)
 botao_b = tk.Button(root, text="B - Calcular Fluxo Máximo", width=40, command=calcular_fluxo)
-botao_c = tk.Button(root, text="C - Exibir Rede Residual", width=40, command=exibir_residual)
 botao_d = tk.Button(root, text="D - Sugerir Cano para Aumentar Capacidade", width=40, command=sugerir_cano)
 botao_e = tk.Button(root, text="Sair", width=40, command=sair)
 
-for botao in [botao_a, botao_b, botao_c, botao_d, botao_e]:
+for botao in [botao_a, botao_b, botao_d, botao_e]:
     botao.pack(pady=6)
 
 root.mainloop()
